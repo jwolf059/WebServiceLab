@@ -1,13 +1,21 @@
 package edu.uw.tacoma.jwolf059.webservicelab;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,33 +26,24 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import edu.uw.tacoma.jwolf059.webservicelab.authenticate.SignInActivity;
 import edu.uw.tacoma.jwolf059.webservicelab.course.Course;
+
 public class CourseActivity extends AppCompatActivity implements CourseFragment.OnListFragmentInteractionListener, CourseAddFragment.CourseAddListener, CourseEditFragment.CourseEditListener  {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course);
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(myToolbar);
+
         if (findViewById(R.id.fragment_container)!= null) {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragment_container, new CourseFragment())
                     .commit();
 
-            if (findViewById(R.id.courseDetail_frag) != null) {
-                FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-                fab.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        CourseAddFragment courseAddFragment = new CourseAddFragment();
-                        getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fragment_container, courseAddFragment)
-                                .addToBackStack(null)
-                                .commit();
-                    }
-                });
-            }
-        } else {
-            FloatingActionButton fab = (FloatingActionButton) findViewById(fab);
+            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
             fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -58,6 +57,12 @@ public class CourseActivity extends AppCompatActivity implements CourseFragment.
     }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_course_list, menu);
+        return true;
+    }
 
     @Override
     public void onListFragmentInteraction(Course item) {
@@ -97,6 +102,26 @@ public class CourseActivity extends AppCompatActivity implements CourseFragment.
 
         }
     }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_logout) {
+            SharedPreferences sharedPreferences =
+                    getSharedPreferences(getString(R.string.LOGIN_PREFS), Context.MODE_PRIVATE);
+            sharedPreferences.edit().putBoolean(getString(R.string.LOGGEDIN), false)
+                    .commit();
+
+            Intent i = new Intent(this, SignInActivity.class);
+            startActivity(i);
+            finish();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+
 
     @Override
     public void addCourse(String url) {
